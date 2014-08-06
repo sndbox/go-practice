@@ -65,6 +65,28 @@ func isSubtree(n1, n2 *Node) bool {
 	return iter(tn, n2)
 }
 
+// 4.8 Design an algorithm to print all paths which sum up to the given value.
+// TODO: This prints a path multiple times. This shouldn't print a path more
+// than once.
+func printPathsSumUpTo(n *Node, sum int) {
+	var iter func(*Node, int, string)
+	iter = func(n *Node, s int, path string) {
+		if n == nil {
+			return
+		}
+		sumSoFar := s + n.Value
+		npath := path + fmt.Sprintf("%d + ", n.Value)
+		if sumSoFar == sum {
+			fmt.Println(npath[:len(npath)-3])
+		}
+		iter(n.Left, sumSoFar, npath)
+		iter(n.Right, sumSoFar, npath)
+		iter(n.Left, 0, "")
+		iter(n.Right, 0, "")
+	}
+	iter(n, 0, "")
+}
+
 func godump(n *Node) {
 	ch := make(chan string)
 	var iter func(*Node, int)
@@ -102,8 +124,12 @@ func main() {
 	tmp := randomN(10)
 	godump(tmp)
 
+	fmt.Println("--- 4.7 ---")
 	t2 := find(tmp, 4)
 	t3 := randomN(3)
 	fmt.Println(isSubtree(tmp, t2))
 	fmt.Println(isSubtree(tmp, t3))
+
+	fmt.Println("--- 4.8 ---")
+	printPathsSumUpTo(tmp, 5)
 }
