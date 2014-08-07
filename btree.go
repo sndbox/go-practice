@@ -69,22 +69,25 @@ func isSubtree(n1, n2 *Node) bool {
 // TODO: This prints a path multiple times. This shouldn't print a path more
 // than once.
 func printPathsSumUpTo(n *Node, sum int) {
-	var iter func(*Node, int, string)
-	iter = func(n *Node, s int, path string) {
+	vs := make([]int, 0)
+	var iter func(n *Node)
+	iter = func(n *Node) {
 		if n == nil {
 			return
 		}
-		sumSoFar := s + n.Value
-		npath := path + fmt.Sprintf("%d + ", n.Value)
-		if sumSoFar == sum {
-			fmt.Println(npath[:len(npath)-3])
+		vs = append(vs, n.Value)
+		tmp := 0
+		for i := len(vs) - 1; i >= 0; i-- {
+			tmp += vs[i]
+			if tmp == sum {
+				fmt.Println(vs[i:])
+			}
 		}
-		iter(n.Left, sumSoFar, npath)
-		iter(n.Right, sumSoFar, npath)
-		iter(n.Left, 0, "")
-		iter(n.Right, 0, "")
+		iter(n.Left)
+		iter(n.Right)
+		vs = vs[:len(vs)-1]
 	}
-	iter(n, 0, "")
+	iter(n)
 }
 
 func godump(n *Node) {
