@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -54,6 +56,45 @@ func NewRunLengthWriter(w io.Writer) *RunLengthWriter {
 	return &RunLengthWriter{w, 5}
 }
 
+type RunLengthReader struct {
+	r *bufio.Reader
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func (r *RunLengthReader) Read(b []byte) (int, error) {
+	i := 0
+	for i < len(b) {
+		ch, err := r.r.ReadByte()
+		if err != nil {
+			return i, err
+		}
+		if ch&0x80 == 0 {
+			b[i] = ch
+			i += 1
+		} else {
+			x, err := r.r.ReadByte()
+			if err != nil {
+				return i, err
+			}
+			m := min(len(b)-i, int(ch&0x7f))
+			buf := bytes.Repeat([]byte{x}, m)
+			copy(b[i:], buf)
+			i += m
+		}
+	}
+	return i, nil
+}
+
+func NewRunLengthReader(r io.Reader) *RunLengthReader {
+	return &RunLengthReader{bufio.NewReader(r)}
+}
+
 func main() {
 	buf := new(bytes.Buffer)
 	w := NewRunLengthWriter(buf)
@@ -64,4 +105,7 @@ func main() {
 	}
 
 	fmt.Println(buf.Bytes())
+
+	r := NewRunLengthReader(strings.NewReader(buf.String()))
+	io.Copy(os.Stdout, r)
 }
